@@ -1,0 +1,24 @@
+{
+  "name": "robyn-browser-agent",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.13.1",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "convex": "convex dev",
+    "convex:once": "convex dev --once",
+    "codegen": "convex codegen",
+    "dev:all": "concurrently -n convex,agent,web -c blue,magenta,green \"convex dev\" \"pnpm --filter agent dev\" \"pnpm --filter web dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "convex": "^1.40.0",
+    "turbo": "^2.5.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp", "unrs-resolver"]
+  }
+}

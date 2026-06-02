@@ -1,0 +1,30 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+dist/
+.turbo/
+
+# env
+.env
+.env.local
+.env*.local
+
+# convex local state
+.convex/
+
+# convex generated code (run `npx convex dev` / codegen to regenerate)
+convex/_generated/
+
+# playwright
+apps/agent/.pw-user-data/
+playwright-report/
+test-results/
+
+# misc
+*.log
+.DS_Store
+.gstack/
