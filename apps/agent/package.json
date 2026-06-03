@@ -1,0 +1,23 @@
+{
+  "name": "agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "convex": "^1.40.0",
+    "openai": "^4.77.0",
+    "playwright": "^1.60.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.0",
+    "typescript": "^5"
+  }
+}
