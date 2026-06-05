@@ -5,13 +5,13 @@ import { runSession, stopRun, isRunning } from "./loop";
 // Each run gets its own browser context (unique profile dir), so runs execute
 // concurrently — start a new task while another is still working.
 startServer({
-  start: (id) => {
+  start: (id, aspect) => {
     if (isRunning(id)) {
       console.log(`[agent] ${id} already running — follow-up will be picked up by the loop`);
       return;
     }
     console.log(`[agent] start session ${id}`);
-    runSession(id).catch((e) => console.error("[agent] run error:", e));
+    runSession(id, aspect).catch((e) => console.error("[agent] run error:", e));
   },
   stop: (id) => {
     console.log(`[agent] stop session ${id}`);

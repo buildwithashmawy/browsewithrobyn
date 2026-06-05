@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
@@ -90,17 +90,46 @@ export default function Home() {
 
   const view = deriveView(session, steps);
 
+  // session ids we've already issued a start for this page-load (resets on refresh),
+  // so the recovery effect below doesn't double-fire alongside onSend.
+  const startedRef = useRef<Set<string>>(new Set());
+  const [agentError, setAgentError] = useState<string | null>(null);
+
   const startAgent = useCallback(async (id: string) => {
+    startedRef.current.add(id);
+    // pass our browser panel's aspect ratio so the agent captures a matching feed
+    const vp = document.querySelector(".viewport")?.getBoundingClientRect();
+    const aspect = vp && vp.height > 0 ? vp.width / vp.height : undefined;
     try {
-      await fetch("/api/start", {
+      const r = await fetch("/api/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: id }),
+        body: JSON.stringify({ sessionId: id, aspect }),
       });
+      if (!r.ok) {
+        const data = (await r.json().catch(() => ({}))) as { error?: string };
+        setAgentError(data.error || "Couldn't reach Robyn's agent. Start it with: pnpm --filter agent dev");
+      } else {
+        setAgentError(null);
+      }
     } catch {
-      /* surfaced via session status; agent may be offline */
+      setAgentError("Couldn't reach Robyn's agent. Start it with: pnpm --filter agent dev");
     }
   }, []);
+
+  // Recover stuck tasks: if the active session is still "idle" (shown as "Queued")
+  // and we haven't kicked it this page-load, (re)issue start. The agent dedupes via
+  // isRunning, so a task that's actually running won't be double-started. This is
+  // what makes a refresh resume a task whose original start was lost.
+  const sessionStatus = session?.status;
+  useEffect(() => {
+    if (!sessionId || !sessionStatus) return;
+    if (sessionStatus === "idle") {
+      if (!startedRef.current.has(sessionId)) void startAgent(sessionId);
+    } else {
+      setAgentError(null);
+    }
+  }, [sessionId, sessionStatus, startAgent]);
 
   const onSend = useCallback(
     async (text: string) => {
@@ -174,6 +203,7 @@ export default function Home() {
         onStop={onStop}
         onRetry={onRetry}
         running={view.running}
+        notice={agentError}
         onToggleSidebar={() => setSidebar(!sidebarOpen)}
       />
       <BrowserPanel

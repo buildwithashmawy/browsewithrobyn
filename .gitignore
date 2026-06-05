@@ -16,8 +16,8 @@ dist/
 # convex local state
 .convex/
 
-# convex generated code (run `npx convex dev` / codegen to regenerate)
-convex/_generated/
+# convex generated code IS committed so production builds (Railway) don't run
+# codegen; regenerate locally with `npx convex dev` / `pnpm codegen`.
 
 # playwright
 apps/agent/.pw-user-data/

@@ -24,7 +24,7 @@ function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
 }
 
 export function startServer(handlers: {
-  start: (sessionId: string) => void;
+  start: (sessionId: string, aspect?: number) => void;
   stop: (sessionId: string) => void;
 }) {
   const srv = createServer(async (req, res) => {
@@ -50,7 +50,8 @@ export function startServer(handlers: {
         json(res, 400, { error: "sessionId required" });
         return;
       }
-      handlers.start(sessionId);
+      const aspect = typeof body.aspect === "number" ? body.aspect : undefined;
+      handlers.start(sessionId, aspect);
       json(res, 200, { ok: true, sessionId });
       return;
     }

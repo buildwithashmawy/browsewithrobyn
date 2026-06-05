@@ -102,6 +102,8 @@ export class ConvexWriter {
     screenshot: Buffer;
     url: { host: string; path: string };
     highlightRect?: HighlightRect;
+    viewportW: number;
+    viewportH: number;
   }) {
     if (!args.screenshot.length) return;
     const uploadUrl: string = await this.client.mutation(api.frames.generateUploadUrl, {});
@@ -117,8 +119,8 @@ export class ConvexWriter {
       storageId: storageId as Id<"_storage">,
       url: args.url,
       highlightRect: args.highlightRect,
-      viewportW: config.viewportW,
-      viewportH: config.viewportH,
+      viewportW: args.viewportW,
+      viewportH: args.viewportH,
     });
   }
 }

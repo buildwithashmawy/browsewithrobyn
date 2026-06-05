@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 // Forward a start request to the agent service (server-side, so AGENT_URL and
 // browser↔agent CORS never reach the client).
 export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as { sessionId?: string };
+  const body = (await req.json().catch(() => ({}))) as {
+    sessionId?: string;
+    aspect?: number;
+  };
   if (!body.sessionId) {
     return NextResponse.json({ error: "sessionId required" }, { status: 400 });
   }
@@ -12,7 +15,7 @@ export async function POST(req: Request) {
     const r = await fetch(`${agent}/session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: body.sessionId }),
+      body: JSON.stringify({ sessionId: body.sessionId, aspect: body.aspect }),
     });
     const data = await r.json().catch(() => ({}));
     return NextResponse.json(data, { status: r.status });

@@ -30,7 +30,7 @@ async function main() {
   });
 
   const browser = new BrowserController();
-  await browser.launch(sessionId);
+  await browser.launch(sessionId, 0.95); // simulate a desktop panel aspect
 
   // step 0: navigate (frame, no highlight)
   const s0 = await writer.appendStep({
@@ -48,6 +48,8 @@ async function main() {
     stepIndex: 0,
     screenshot: await browser.screenshot(),
     url: browser.urlParts(),
+    viewportW: browser.vw,
+    viewportH: browser.vh,
   });
   await writer.setStep(s0, "success");
 
@@ -71,6 +73,8 @@ async function main() {
     screenshot: await browser.screenshot(),
     url: browser.urlParts(),
     highlightRect: r ? { x: r.x, y: r.y, w: r.width, h: r.height } : undefined,
+    viewportW: browser.vw,
+    viewportH: browser.vh,
   });
 
   await browser.close();

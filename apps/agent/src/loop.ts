@@ -28,7 +28,7 @@ export function isRunning(sessionId: string): boolean {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function runSession(sessionId: string) {
+export async function runSession(sessionId: string, aspect?: number) {
   const writer = new ConvexWriter();
   const handle: RunHandle = { stopped: false };
   RUNS.set(sessionId, handle);
@@ -88,7 +88,7 @@ export async function runSession(sessionId: string) {
 
   try {
     await writer.patchSession(sessionId, { status: "thinking" });
-    await browser.launch(sessionId);
+    await browser.launch(sessionId, aspect);
 
     let plan: string[] = [];
     if (!isContinuation) {
@@ -169,6 +169,8 @@ export async function runSession(sessionId: string) {
           stepIndex: stepNo,
           screenshot: await browser.screenshot(),
           url: browser.urlParts(),
+          viewportW: browser.vw,
+          viewportH: browser.vh,
         });
         const report = await llm
           .finalReport({ goal: `${goal}\n${convoText()}`, extracted, model })
@@ -215,6 +217,8 @@ export async function runSession(sessionId: string) {
           stepIndex: idx,
           screenshot: await browser.screenshot(),
           url: browser.urlParts(),
+          viewportW: browser.vw,
+          viewportH: browser.vh,
         });
       } else {
         let loc = resolveLocator(browser.page, action);
@@ -236,6 +240,8 @@ export async function runSession(sessionId: string) {
           highlightRect: rect
             ? { x: rect.x, y: rect.y, w: rect.width, h: rect.height }
             : undefined,
+          viewportW: browser.vw,
+          viewportH: browser.vh,
         });
         for (let a = 0; a <= config.perStepRetry && !acted; a++) {
           try {

@@ -19,14 +19,23 @@ export class BrowserController {
   private ctx?: BrowserContext;
   private dir?: string;
   page!: Page;
+  vw = config.viewportW;
+  vh = config.viewportH;
 
-  async launch(sessionId: string) {
+  async launch(sessionId: string, aspect?: number) {
     // unique profile per run → concurrent runs don't fight over one locked dir
     this.dir = join(USER_DATA_BASE, sessionId.replace(/[^a-z0-9]/gi, ""));
+    // match the on-screen panel's aspect ratio (keeping a desktop width) so the feed
+    // fills the browser window with no letterbox and no overflow
+    this.vw = config.viewportW;
+    this.vh =
+      aspect && aspect > 0.4 && aspect < 3
+        ? Math.max(700, Math.min(1700, Math.round(config.viewportW / aspect)))
+        : config.viewportH;
     this.ctx = await chromium.launchPersistentContext(this.dir, {
       headless: config.headless,
       channel: config.pwChannel,
-      viewport: { width: config.viewportW, height: config.viewportH },
+      viewport: { width: this.vw, height: this.vh },
       deviceScaleFactor: 1, // keep screenshot px == CSS px == boundingBox coords
       locale: "en-US",
       timezoneId: "America/Los_Angeles",
@@ -40,6 +49,9 @@ export class BrowserController {
     });
     this.page = this.ctx.pages()[0] ?? (await this.ctx.newPage());
     this.page.setDefaultTimeout(12000);
+    console.log(
+      `[agent] viewport ${this.vw}×${this.vh}${aspect ? ` (aspect ${aspect.toFixed(2)})` : ""}`,
+    );
   }
 
   async close() {

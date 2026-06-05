@@ -32,16 +32,19 @@ export function ModelPicker({
 
   const current = models.find((m) => m.id === value);
 
-  const { vision, textOnly } = useMemo(() => {
+  const { vision, textOnly, showSelected } = useMemo(() => {
     const s = q.trim().toLowerCase();
     const match = (m: ModelInfo) =>
       !s || m.name.toLowerCase().includes(s) || m.id.toLowerCase().includes(s);
-    const filtered = models.filter(match);
+    // pin the selected model to the top; drop it from the groups so it isn't repeated
+    const rest = models.filter((m) => m.id !== value);
+    const filtered = rest.filter(match);
     return {
       vision: filtered.filter((m) => m.vision),
       textOnly: filtered.filter((m) => !m.vision),
+      showSelected: !!current && match(current),
     };
-  }, [models, q]);
+  }, [models, q, value, current]);
 
   const label =
     loading && !models.length
@@ -53,7 +56,7 @@ export function ModelPicker({
       <button
         className="model-btn"
         onClick={() => setOpen((o) => !o)}
-        title={current?.id || "Select model"}
+        title={current ? `${current.name} — ${current.id}` : "Select model"}
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -78,6 +81,28 @@ export function ModelPicker({
             onChange={(e) => setQ(e.target.value)}
             autoFocus
           />
+
+          {showSelected && current ? (
+            <>
+              <div className="mp-group-label">Selected</div>
+              <button
+                className="mp-item"
+                role="option"
+                aria-selected
+                onClick={() => setOpen(false)}
+              >
+                {current.vision ? (
+                  <span className="mp-i-eye">
+                    <Icon name="eye" size={13} />
+                  </span>
+                ) : null}
+                <span className="mp-i-name">{current.name}</span>
+                <span className="mp-i-check">
+                  <Icon name="check" size={13} />
+                </span>
+              </button>
+            </>
+          ) : null}
 
           {vision.length > 0 ? (
             <div className="mp-group-label">Vision · recommended</div>

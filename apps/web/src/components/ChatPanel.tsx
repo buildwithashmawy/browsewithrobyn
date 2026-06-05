@@ -37,6 +37,7 @@ export interface ChatPanelProps {
   onStop: () => void;
   onRetry: () => void;
   running: boolean;
+  notice?: string | null;
   onToggleSidebar?: () => void;
 }
 
@@ -59,6 +60,7 @@ export function ChatPanel({
   onStop,
   onRetry,
   running,
+  notice,
   onToggleSidebar,
 }: ChatPanelProps) {
   return (
@@ -104,6 +106,13 @@ export function ChatPanel({
           onRetry={onRetry}
         />
       )}
+
+      {notice ? (
+        <div className="agent-notice" role="alert">
+          <Icon name="warn" size={14} />
+          <span>{notice}</span>
+        </div>
+      ) : null}
 
       <Composer
         onSend={onSend}

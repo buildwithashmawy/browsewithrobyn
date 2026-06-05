@@ -9,9 +9,9 @@ export interface Box {
 }
 
 // Project an agent-space rect (CSS px within the agent's viewport) onto the
-// rendered <img> box. The screenshot fills the viewport with object-fit: cover
-// + object-position: top center, so it's scaled up and the overflow is cropped;
-// we mirror that math and hide the overlay if the target is cropped out of view.
+// rendered <img> box. The screenshot is shown with object-fit: contain, so the
+// whole feed is always visible (never cropped); the agent captures at the panel's
+// aspect ratio so there's effectively no letterbox. We mirror the contain math.
 export function projectRect(
   rect: HighlightRect,
   natW: number,
@@ -21,15 +21,15 @@ export function projectRect(
   pad = 6,
 ): Box | null {
   if (!natW || !natH || !cw || !ch) return null;
-  const scale = Math.max(cw / natW, ch / natH); // cover
-  // object-position: top left → no offset; overflow is cropped on the right/bottom
-  const left = rect.x * scale - pad;
-  const top = rect.y * scale - pad;
-  const width = rect.w * scale + pad * 2;
-  const height = rect.h * scale + pad * 2;
-  // cropped entirely out of the visible viewport → don't draw
-  if (left + width < 0 || left > cw || top + height < 0 || top > ch) return null;
-  return { left, top, width, height };
+  const scale = Math.min(cw / natW, ch / natH); // contain
+  const offX = (cw - natW * scale) / 2;
+  const offY = (ch - natH * scale) / 2;
+  return {
+    left: offX + rect.x * scale - pad,
+    top: offY + rect.y * scale - pad,
+    width: rect.w * scale + pad * 2,
+    height: rect.h * scale + pad * 2,
+  };
 }
 
 // Track an element's content-box size, recomputing on resize.

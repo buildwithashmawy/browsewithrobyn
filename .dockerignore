@@ -1,0 +1,41 @@
+# Keep the Docker build context lean. Both services build from the repo root
+# (so the Dockerfiles can see pnpm-lock.yaml + the workspace), so anything not
+# needed inside the image is excluded here.
+
+# deps — reinstalled inside the image
+node_modules
+**/node_modules
+.pnpm-store
+
+# build outputs / caches
+.next
+**/.next
+dist
+**/dist
+.dist
+out
+.turbo
+**/.turbo
+**/*.tsbuildinfo
+coverage
+
+# local + runtime state (NOT the committed convex/ source)
+.convex
+**/.pw-user-data
+playwright-report
+test-results
+
+# secrets / local env — set these as Railway variables instead of baking them in
+.env
+.env.*
+**/.env
+**/.env.*
+
+# vcs & local tooling
+.git
+.gstack
+.github
+
+# misc
+*.log
+.DS_Store
