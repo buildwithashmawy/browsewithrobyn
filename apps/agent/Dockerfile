@@ -8,10 +8,14 @@ FROM mcr.microsoft.com/playwright:v1.60.0-noble
 
 WORKDIR /app
 
-# Browsers already live in the image at $PLAYWRIGHT_BROWSERS_PATH — never redownload.
+# Browsers already live in the image at /ms-playwright — never redownload. We set
+# PLAYWRIGHT_BROWSERS_PATH explicitly: without it, Playwright looks in the default
+# ~/.cache/ms-playwright (i.e. /root/.cache) and won't find the image's bundled
+# Chromium ("Executable doesn't exist…").
 # NODE_ENV is intentionally left unset during install: the agent runs via `tsx`,
 # which is a devDependency, so dev deps must NOT be pruned.
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     CI=1
 
 # pnpm via corepack; version is pinned by the root package.json "packageManager".
