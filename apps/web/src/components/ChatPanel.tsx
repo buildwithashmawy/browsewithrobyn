@@ -111,6 +111,10 @@ export function ChatPanel({
         <div className="agent-notice" role="alert">
           <Icon name="warn" size={14} />
           <span>{notice}</span>
+          <button className="agent-notice-retry" onClick={onRetry} title="Try again">
+            <Icon name="replay" size={13} />
+            Retry
+          </button>
         </div>
       ) : null}
 
