@@ -108,12 +108,12 @@ export default function Home() {
       });
       if (!r.ok) {
         const data = (await r.json().catch(() => ({}))) as { error?: string };
-        setAgentError(data.error || "Couldn't reach Robyn's agent. Start it with: pnpm --filter agent dev");
+        setAgentError(data.error || `Couldn't reach Robyn's agent. at ${process.env.AGENT_URL}`);
       } else {
         setAgentError(null);
       }
     } catch {
-      setAgentError("Couldn't reach Robyn's agent. Start it with: pnpm --filter agent dev");
+      setAgentError(`Couldn't reach Robyn's agent. at ${process.env.AGENT_URL}`);
     }
   }, []);
 

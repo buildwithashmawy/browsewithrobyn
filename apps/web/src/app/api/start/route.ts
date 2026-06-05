@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   if (!body.sessionId) {
     return NextResponse.json({ error: "sessionId required" }, { status: 400 });
   }
-  const agent = process.env.AGENT_URL || "http://localhost:8787";
+  const agent = process.env.AGENT_URL;
   try {
     const r = await fetch(`${agent}/session`, {
       method: "POST",
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return NextResponse.json(data, { status: r.status });
   } catch {
     return NextResponse.json(
-      { error: `Agent service unreachable at ${agent}. Start it with: pnpm --filter agent dev` },
+      { error: `Agent service unreachable at ${process.env.AGENT_URL}` },
       { status: 502 },
     );
   }
