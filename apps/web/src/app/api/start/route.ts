@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Forward a start request to the agent service (server-side, so AGENT_URL and
+// Forward a start request to the agent service (server-side, so NEXT_PUBLIC_AGENT_URL and
 // browser↔agent CORS never reach the client).
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as {
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   if (!body.sessionId) {
     return NextResponse.json({ error: "sessionId required" }, { status: 400 });
   }
-  const agent = process.env.AGENT_URL;
+  const agent = process.env.NEXT_PUBLIC_AGENT_URL;
   try {
     const r = await fetch(`${agent}/session`, {
       method: "POST",
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return NextResponse.json(data, { status: r.status });
   } catch {
     return NextResponse.json(
-      { error: `Agent service unreachable at ${process.env.AGENT_URL}` },
+      { error: `Agent service unreachable at ${process.env.NEXT_PUBLIC_AGENT_URL}` },
       { status: 502 },
     );
   }

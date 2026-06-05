@@ -73,7 +73,7 @@ Smartness/robustness levers:
 - Element-not-found → re-observe and re-plan instead of crashing.
 - Per-step retry cap + global step cap.
 - **CAPTCHA / bot-walls are detected and the run stops cleanly** with an honest report.
-- **Conversational** — when it needs information only you have, it uses an `ask` action: the run pauses (status *Waiting for you*, browser kept open), you reply in the same session, and it resumes from where it was. Follow-up messages mid-run are honored too.
+- **Conversational** — when it needs information only you have, it uses an `ask` action: the run pauses (status _Waiting for you_, browser kept open), you reply in the same session, and it resumes from where it was. Follow-up messages mid-run are honored too.
 - Recoverable hiccups map to the amber **`recover`** step state with a human note; the
   Robyn character shifts amber too. Hard blocks map to a calm `failed` (never red-screen).
 - Before each screenshot the agent computes the acted element's bounding box and stores it
@@ -124,7 +124,7 @@ the two env files below.
 
 ```ini
 NEXT_PUBLIC_CONVEX_URL=<the Convex URL from step 1>
-AGENT_URL=http://localhost:8787
+NEXT_PUBLIC_AGENT_URL=http://localhost:8787
 ```
 
 `apps/agent/.env`
@@ -157,14 +157,14 @@ Open <http://localhost:3000>, pick a model, and click a demo chip.
 
 ### Env vars
 
-| Var | Used by | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_CONVEX_URL` | web | Convex deployment URL (browser-safe) |
-| `AGENT_URL` | web (server) | where the start/stop proxy forwards to |
-| `CONVEX_URL` | agent | same Convex deployment URL |
-| `OPENROUTER_API_KEY` | agent | **your** key; all LLM calls (never shipped to the browser) |
-| `OPENROUTER_MODEL` | agent | default/fallback model (the picker overrides per run) |
-| `PORT` | agent | agent HTTP port (default 8787) |
+| Var                      | Used by      | Purpose                                                    |
+| ------------------------ | ------------ | ---------------------------------------------------------- |
+| `NEXT_PUBLIC_CONVEX_URL` | web          | Convex deployment URL (browser-safe)                       |
+| `NEXT_PUBLIC_AGENT_URL`  | web (server) | where the start/stop proxy forwards to                     |
+| `CONVEX_URL`             | agent        | same Convex deployment URL                                 |
+| `OPENROUTER_API_KEY`     | agent        | **your** key; all LLM calls (never shipped to the browser) |
+| `OPENROUTER_MODEL`       | agent        | default/fallback model (the picker overrides per run)      |
+| `PORT`                   | agent        | agent HTTP port (default 8787)                             |
 
 Optional: `HEADLESS=0` (show the Chromium window — **headless by default**), `PW_CHANNEL=chrome`
 (use real Chrome), `VIEWPORT_W` / `VIEWPORT_H` (browser size, default 1280×1000),
@@ -192,16 +192,16 @@ Convex, no agent, no API key. Useful for reviewing the design and animations.
 ## Known limitations (honest scope)
 
 - **CAPTCHA / bot detection.** The agent searches with **Google** (as requested). Google
-  *search* aggressively blocks automated browsers — it serves a `/sorry` CAPTCHA page, and a
-  spoofed user-agent isn't enough to avoid it. Google *Flights* and most ordinary sites work
+  _search_ aggressively blocks automated browsers — it serves a `/sorry` CAPTCHA page, and a
+  spoofed user-agent isn't enough to avoid it. Google _Flights_ and most ordinary sites work
   fine; weather has a direct `wttr.in` path. When Robyn hits a CAPTCHA it can't pass, it
-  **stops cleanly with an honest report**. For reliable Google *search*, run against a real,
+  **stops cleanly with an honest report**. For reliable Google _search_, run against a real,
   logged-in Chrome profile (`PW_CHANNEL=chrome` + a persistent user-data dir).
 - **Auth-gated tasks are out of scope.** No logins, payments, or account creation — if a
   task needs them, Robyn reports `failed` and says why.
 - **Pause has a timeout.** When Robyn pauses to ask, it waits ~4 minutes for your reply, then
   gives up (send another message to pick it back up). Continuing a session that already
-  *finished* re-opens a fresh browser, so it re-navigates rather than restoring exact state.
+  _finished_ re-opens a fresh browser, so it re-navigates rather than restoring exact state.
 - **Screenshots** live in Convex file storage (size/retention untuned).
 - **No auth.** Single anonymous user — intentional for a take-home.
 

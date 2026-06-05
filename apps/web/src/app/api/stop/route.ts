@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   if (!body.sessionId) {
     return NextResponse.json({ error: "sessionId required" }, { status: 400 });
   }
-  const agent = process.env.AGENT_URL || "http://localhost:8787";
+  const agent = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:8787";
   try {
     const r = await fetch(`${agent}/session/${body.sessionId}/stop`, {
       method: "POST",
