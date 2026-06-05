@@ -15,7 +15,7 @@ startServer({
   },
   stop: (id) => {
     console.log(`[agent] stop session ${id}`);
-    stopRun(id);
+    stopRun(id).catch((e) => console.error("[agent] stop error:", e));
   },
 });
 

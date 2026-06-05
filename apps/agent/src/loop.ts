@@ -15,12 +15,28 @@ const SELF_CHECK_KINDS = new Set(["click", "type", "extract"]);
 
 interface RunHandle {
   stopped: boolean;
+  browser?: BrowserController;
 }
 const RUNS = new Map<string, RunHandle>();
 
-export function stopRun(sessionId: string) {
+// Stop a run. For a live run we flip the flag AND close the browser so any
+// in-flight Playwright op (page.goto, waitFor, an LLM-gated step) unblocks at
+// once instead of waiting out its timeout. For an orphaned session — one left
+// "running" in Convex after an agent restart, with no entry in RUNS — we patch
+// it to failed directly so the UI's Stop button still resolves it cleanly.
+export async function stopRun(sessionId: string) {
   const h = RUNS.get(sessionId);
-  if (h) h.stopped = true;
+  if (h) {
+    h.stopped = true;
+    await h.browser?.close().catch(() => {});
+    return;
+  }
+  const writer = new ConvexWriter();
+  const s = await writer.getSession(sessionId).catch(() => null);
+  if (s && ["idle", "thinking", "acting", "waiting"].includes(s.status)) {
+    await writer.patchSession(sessionId, { status: "failed", summary: "Stopped by you." });
+    await writer.addMessage(sessionId, "agent", "Stopped by you.");
+  }
 }
 export function isRunning(sessionId: string): boolean {
   return RUNS.has(sessionId);
@@ -89,6 +105,7 @@ export async function runSession(sessionId: string, aspect?: number) {
   try {
     await writer.patchSession(sessionId, { status: "thinking" });
     await browser.launch(sessionId, aspect);
+    handle.browser = browser; // let stopRun() close it to interrupt in-flight ops
 
     let plan: string[] = [];
     if (!isContinuation) {
@@ -129,7 +146,17 @@ export async function runSession(sessionId: string, aspect?: number) {
           model,
         });
       } catch (e) {
+        if (handle.stopped) {
+          await failWith("Stopped by you.");
+          break;
+        }
         await failWith(`I couldn't get a valid next step from the model: ${errMsg(e)}`);
+        break;
+      }
+
+      // Stop may have landed while we were planning — bail before appending a step.
+      if (handle.stopped) {
+        await failWith("Stopped by you.");
         break;
       }
 
@@ -294,6 +321,11 @@ export async function runSession(sessionId: string, aspect?: number) {
       if (acted && achieved) {
         status = "success";
       } else if (!acted) {
+        if (handle.stopped) {
+          await writer.setStep(stepId, "failed", "Stopped by you.");
+          await failWith("Stopped by you.");
+          break;
+        }
         if (/closed/i.test(lastErr)) {
           await writer.setStep(stepId, "failed", "Browser closed unexpectedly.");
           await failWith("The browser closed unexpectedly mid-run. Please try again.");
@@ -323,7 +355,8 @@ export async function runSession(sessionId: string, aspect?: number) {
       );
     }
   } catch (e) {
-    await failWith(`Agent error: ${errMsg(e)}`).catch(() => {});
+    if (handle.stopped) await failWith("Stopped by you.").catch(() => {});
+    else await failWith(`Agent error: ${errMsg(e)}`).catch(() => {});
   } finally {
     RUNS.delete(sessionId);
     await browser.close();
