@@ -10,7 +10,10 @@ export async function POST(req: Request) {
   if (!body.sessionId) {
     return NextResponse.json({ error: "sessionId required" }, { status: 400 });
   }
-  const agent = process.env.NEXT_PUBLIC_AGENT_URL;
+  // AGENT_URL (server-only, read at runtime) wins so Railway can route over private
+  // networking, e.g. http://agent.railway.internal:8787. Public URL is the fallback.
+  const agent =
+    process.env.AGENT_URL || process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:8787";
   try {
     const r = await fetch(`${agent}/session`, {
       method: "POST",
@@ -21,7 +24,7 @@ export async function POST(req: Request) {
     return NextResponse.json(data, { status: r.status });
   } catch {
     return NextResponse.json(
-      { error: `Agent service unreachable at ${process.env.NEXT_PUBLIC_AGENT_URL}` },
+      { error: `Agent service unreachable at ${agent}` },
       { status: 502 },
     );
   }

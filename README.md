@@ -160,7 +160,8 @@ Open <http://localhost:3000>, pick a model, and click a demo chip.
 | Var                      | Used by      | Purpose                                                    |
 | ------------------------ | ------------ | ---------------------------------------------------------- |
 | `NEXT_PUBLIC_CONVEX_URL` | web          | Convex deployment URL (browser-safe)                       |
-| `NEXT_PUBLIC_AGENT_URL`  | web (server) | where the start/stop proxy forwards to                     |
+| `AGENT_URL`              | web (server) | preferred agent URL for the start/stop proxy, read at runtime; on Railway use private networking (`http://agent.railway.internal:8787`) |
+| `NEXT_PUBLIC_AGENT_URL`  | web (server) | fallback agent URL when `AGENT_URL` is unset               |
 | `CONVEX_URL`             | agent        | same Convex deployment URL                                 |
 | `OPENROUTER_API_KEY`     | agent        | **your** key; all LLM calls (never shipped to the browser) |
 | `OPENROUTER_MODEL`       | agent        | default/fallback model (the picker overrides per run)      |
